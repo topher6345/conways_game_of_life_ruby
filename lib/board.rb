@@ -7,8 +7,8 @@ class Board
   end
 
   def neighbor_locations_for(x,y,val=1)
-    x = x % @size
-    y = y % @size  
+    x = x #% @size
+    y = y #% @size  
     [
       [[x-1,y-1], [x,y-1], [x+1,y-1]],
       [[x-1,y  ], [x,y  ], [x+1,y  ]],
@@ -24,7 +24,7 @@ class Board
     end
   end
 
-  def set_9(x,y,val)
+  def set_9(x,y,val=1)
     neighbor_locations_for(x,y).map do |row|
       row.map do |col|
         set(*(col+[val]))
@@ -35,8 +35,8 @@ class Board
   def locations_of(val)
     locations = []
     @data.each_with_index do |row, ri|
-      row.each_with_index do |col, ci|
-        locations << [ri,ci] if col == val
+      row.map.with_index do |col, ci|
+        locations << [ci,ri] if col == val
       end
     end
     locations
