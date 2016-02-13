@@ -1,0 +1,5 @@
+source 'https://rubygems.org'
+gem 'gosu'
+gem 'minitest'
+gem 'guard'
+gem 'guard-minitest'
