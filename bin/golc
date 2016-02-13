@@ -1,0 +1,20 @@
+#!/usr/bin/env ruby
+require_relative '../lib/board'
+
+board = Board.new(32) { [0, 0, 0, 1].sample }
+
+loop do
+  begin
+    puts `clear`
+    puts "Conway's game of life in Ruby by Christopher Saunders"
+    p board
+    puts 'Press Ctrl+C to quit'
+    sleep 0.5
+    board.update
+
+  rescue Interrupt
+    puts `clear`
+    puts 'Thanks for playing - https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life'
+    abort
+  end
+end

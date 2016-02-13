@@ -1,14 +1,14 @@
 require 'pry'
 class Board
+  LIVE = 1
+  DEAD = 0
   attr_accessor :data
   def initialize(size, &block)
     @size = size
     @data = Array.new(@size**2, &block).each_slice(@size).to_a
   end
 
-  def neighbor_locations_for(x,y,val=1)
-    x = x #% @size
-    y = y #% @size  
+  def neighbor_locations_for(x,y)
     [
       [[x-1,y-1], [x,y-1], [x+1,y-1]],
       [[x-1,y  ], [x,y  ], [x+1,y  ]],
@@ -35,7 +35,7 @@ class Board
   def locations_of(val)
     locations = []
     @data.each_with_index do |row, ri|
-      row.map.with_index do |col, ci|
+      row.each_with_index do |col, ci|
         locations << [ci,ri] if col == val
       end
     end
@@ -43,7 +43,7 @@ class Board
   end
 
   def get(x,y)
-    @data[x][y]
+    @data[x % @size][y% @size]
   end
 
   def set(x,y,val=1)
@@ -60,40 +60,38 @@ class Board
 
     @data.each_with_index do |row,i|
       row.each_with_index do |col,j|
-        puts "value #{col}, index: #{j}"
-        if col == 1
+        live = (col == LIVE)
+        value_live_neighbors = live_neighbors(i,j)
 
-          ln = live_neighbors(i,j)
-          case ln
+        if live
           # Any live cell with fewer than two live neighbours dies,
           # as if caused by under-population.
-          when ln < 2
-            new_board.set(i,j,0)
+          if value_live_neighbors < 2 then new_board.set(i,j,DEAD)
 
           # Any live cell with two or three live neighbours lives on to the next generation.
-          when (ln==2 || ln==3)
-            new_board.set(i,j,1)
+          elsif (value_live_neighbors==2 || value_live_neighbors==3)
+            new_board.set(i,j,LIVE)
           # Any live cell with more than three live neighbours dies, as if by over-population.
-          when ln > 3
-            new_board.set(i,j,0)
+          elsif value_live_neighbors > 3 then new_board.set(i,j,DEAD)
           end
-        else
-          if live_neighbors(i,j) == 3
-            new_board.set(i,j,1)
+        elsif !live
+          if value_live_neighbors == 3
+            new_board.set(i,j,LIVE)
           else
-            new_board.set(i,j,0)
+            new_board.set(i,j,DEAD)
           end
         end
       end
     end
     @data = new_board.data
+    self
   end
 
   def live_neighbors(x,y)
     count = 0
     neighbor_values(x,y).each_with_index do |row, ri|
       row.each_with_index do |col, ci|
-        next if ci == 1 && ri == 1
+        next if ci == 1 && ri == 1 # center point, dont count it
         count +=1 if col == 1
       end
     end
@@ -101,8 +99,17 @@ class Board
   end
 
   def inspect
-    @data
+    str = "\n"
+    @data.each do |row|
+      row.each do |col|
+        if col == 1
+          str << " ▩ "
+        else
+          str << "   "
+        end
+      end
+      str << "\n"
+    end
+    str
   end
-
-  alias_method :inspect, :to_s
 end
